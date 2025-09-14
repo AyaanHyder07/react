@@ -9,16 +9,11 @@ export default function SemesterPage() {
   const loadData = async () => {
     try {
       const data = await fetchAll("semesters");
-      // ✅ SAFEGUARD: Ensure data is an array before setting state
       setSemesters(Array.isArray(data) ? data : []);
-    } catch (err) {
-      setError("Failed to load semesters");
-    }
+    } catch (err) { setError("Failed to load semesters"); }
   };
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  useEffect(() => { loadData(); }, []);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -27,30 +22,22 @@ export default function SemesterPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await createEntity("semesters", {
-        sno: form.sno, // Assuming sno is a string like "1st", if it's a number, convert it
-        stage: form.stage,
-        endYear: Number(form.endYear),
-      });
+      await createEntity("semesters", { ...form, endYear: Number(form.endYear) });
       setForm({ sno: "", stage: "", endYear: "" });
       loadData();
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to create semester");
-    }
+    } catch (err) { setError(err.response?.data?.message || "Failed to create semester"); }
   };
 
   return (
     <div>
       <h2>Semesters</h2>
       {error && <div style={{ color: "red" }}>{error}</div>}
-
       <form onSubmit={handleSubmit}>
         <input name="sno" value={form.sno} onChange={handleChange} placeholder="S.No" />
         <input name="stage" value={form.stage} onChange={handleChange} placeholder="Stage" />
         <input name="endYear" value={form.endYear} onChange={handleChange} placeholder="End Year" />
         <button type="submit">Add Semester</button>
       </form>
-
       <table border="1">
         <thead>
           <tr><th>ID</th><th>S.No</th><th>Stage</th><th>End Year</th></tr>

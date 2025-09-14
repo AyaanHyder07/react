@@ -9,16 +9,11 @@ export default function DepartmentPage() {
   const loadData = async () => {
     try {
       const data = await fetchAll("departments");
-      // ✅ SAFEGUARD: Ensure data is an array before setting state
       setDepartments(Array.isArray(data) ? data : []);
-    } catch (err) {
-      setError("Failed to load departments");
-    }
+    } catch (err) { setError("Failed to load departments"); }
   };
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  useEffect(() => { loadData(); }, []);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -27,30 +22,22 @@ export default function DepartmentPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await createEntity("departments", {
-        name: form.name,
-        intake: Number(form.intake),
-        hod: form.hod,
-      });
+      await createEntity("departments", { ...form, intake: Number(form.intake) });
       setForm({ name: "", intake: "", hod: "" });
       loadData();
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to create department");
-    }
+    } catch (err) { setError(err.response?.data?.message || "Failed to create department"); }
   };
 
   return (
     <div>
       <h2>Departments</h2>
       {error && <div style={{ color: "red" }}>{error}</div>}
-
       <form onSubmit={handleSubmit}>
         <input name="name" value={form.name} onChange={handleChange} placeholder="Name" />
         <input name="intake" value={form.intake} onChange={handleChange} placeholder="Intake" />
         <input name="hod" value={form.hod} onChange={handleChange} placeholder="HOD" />
         <button type="submit">Add Department</button>
       </form>
-
       <table border="1">
         <thead>
           <tr><th>ID</th><th>Name</th><th>Intake</th><th>HOD</th></tr>

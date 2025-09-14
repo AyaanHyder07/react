@@ -3,25 +3,17 @@ import { fetchAll, createEntity } from "../api";
 
 export default function AssessmentPage() {
   const [assessments, setAssessments] = useState([]);
-  const [form, setForm] = useState({
-    number: "",
-    date: "",
-    marks: "",
-    totalMarks: "",
-  });
+  const [form, setForm] = useState({ number: "", date: "", marks: "", totalMarks: "" });
   const [error, setError] = useState(null);
 
   const loadData = async () => {
     try {
-      setAssessments(await fetchAll("assessments"));
-    } catch (err) {
-      setError("Failed to load assessments");
-    }
+      const data = await fetchAll("assessments");
+      setAssessments(Array.isArray(data) ? data : []);
+    } catch (err) { setError("Failed to load assessments"); }
   };
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  useEffect(() => { loadData(); }, []);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -30,25 +22,16 @@ export default function AssessmentPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const payload = {
-        number: form.number,
-        date: form.date,
-        marks: Number(form.marks),
-        totalMarks: Number(form.totalMarks),
-      };
-      await createEntity("assessments", payload);
+      await createEntity("assessments", { ...form, marks: Number(form.marks), totalMarks: Number(form.totalMarks) });
       setForm({ number: "", date: "", marks: "", totalMarks: "" });
       loadData();
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to create assessment");
-    }
+    } catch (err) { setError(err.response?.data?.message || "Failed to create assessment"); }
   };
 
   return (
     <div>
       <h2>Assessments</h2>
       {error && <div style={{ color: "red" }}>{error}</div>}
-
       <form onSubmit={handleSubmit}>
         <input name="number" value={form.number} onChange={handleChange} placeholder="Number" />
         <input type="date" name="date" value={form.date} onChange={handleChange} />
@@ -56,7 +39,6 @@ export default function AssessmentPage() {
         <input name="totalMarks" value={form.totalMarks} onChange={handleChange} placeholder="Total Marks" />
         <button type="submit">Add Assessment</button>
       </form>
-
       <table border="1">
         <thead>
           <tr><th>ID</th><th>No</th><th>Date</th><th>Marks</th><th>Total</th></tr>

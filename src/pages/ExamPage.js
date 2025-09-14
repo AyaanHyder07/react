@@ -3,25 +3,17 @@ import { fetchAll, createEntity } from "../api";
 
 export default function ExamPage() {
   const [exams, setExams] = useState([]);
-  const [form, setForm] = useState({
-    name: "",
-    date: "",
-    type: "",
-    totalMarks: "",
-  });
+  const [form, setForm] = useState({ name: "", date: "", type: "", totalMarks: "" });
   const [error, setError] = useState(null);
 
   const loadData = async () => {
     try {
-      setExams(await fetchAll("exams"));
-    } catch (err) {
-      setError("Failed to load exams");
-    }
+      const data = await fetchAll("exams");
+      setExams(Array.isArray(data) ? data : []);
+    } catch (err) { setError("Failed to load exams"); }
   };
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  useEffect(() => { loadData(); }, []);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -30,25 +22,16 @@ export default function ExamPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const payload = {
-        name: form.name,
-        date: form.date,
-        type: form.type,
-        totalMarks: Number(form.totalMarks),
-      };
-      await createEntity("exams", payload);
+      await createEntity("exams", { ...form, totalMarks: Number(form.totalMarks) });
       setForm({ name: "", date: "", type: "", totalMarks: "" });
       loadData();
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to create exam");
-    }
+    } catch (err) { setError(err.response?.data?.message || "Failed to create exam"); }
   };
 
   return (
     <div>
       <h2>Exams</h2>
       {error && <div style={{ color: "red" }}>{error}</div>}
-
       <form onSubmit={handleSubmit}>
         <input name="name" value={form.name} onChange={handleChange} placeholder="Name" />
         <input type="date" name="date" value={form.date} onChange={handleChange} />
@@ -56,7 +39,6 @@ export default function ExamPage() {
         <input name="totalMarks" value={form.totalMarks} onChange={handleChange} placeholder="Total Marks" />
         <button type="submit">Add Exam</button>
       </form>
-
       <table border="1">
         <thead>
           <tr><th>ID</th><th>Name</th><th>Date</th><th>Type</th><th>Total Marks</th></tr>
