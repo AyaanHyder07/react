@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchAll, createEntity } from "../api";
+import { fetchAll, createEntity, deleteEntity } from "../api";
 
 export default function SubjectPage() {
   const [subjects, setSubjects] = useState([]);
@@ -8,6 +8,7 @@ export default function SubjectPage() {
 
   const loadData = async () => {
     try {
+      setError(null);
       const data = await fetchAll("subjects");
       setSubjects(Array.isArray(data) ? data : []);
     } catch (err) { setError("Failed to load subjects"); }
@@ -15,17 +16,26 @@ export default function SubjectPage() {
 
   useEffect(() => { loadData(); }, []);
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      setError(null);
       await createEntity("subjects", { ...form, credits: Number(form.credits), duration: Number(form.duration) });
       setForm({ code: "", name: "", credits: "", duration: "" });
       loadData();
     } catch (err) { setError(err.response?.data?.message || "Failed to create subject"); }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this subject?")) {
+      try {
+        setError(null);
+        await deleteEntity("subjects", id);
+        loadData();
+      } catch (err) { setError(err.response?.data?.message || "Failed to delete subject"); }
+    }
   };
 
   return (
@@ -41,16 +51,13 @@ export default function SubjectPage() {
       </form>
       <table border="1">
         <thead>
-          <tr><th>ID</th><th>Code</th><th>Name</th><th>Credits</th><th>Duration</th></tr>
+          <tr><th>ID</th><th>Code</th><th>Name</th><th>Credits</th><th>Actions</th></tr>
         </thead>
         <tbody>
           {subjects.map((s) => (
             <tr key={s.id}>
-              <td>{s.id}</td>
-              <td>{s.code}</td>
-              <td>{s.name}</td>
-              <td>{s.credits}</td>
-              <td>{s.duration}</td>
+              <td>{s.id}</td><td>{s.code}</td><td>{s.name}</td><td>{s.credits}</td>
+              <td><button onClick={() => handleDelete(s.id)}>Delete</button></td>
             </tr>
           ))}
         </tbody>

@@ -1,22 +1,18 @@
 import { useEffect, useState } from "react";
-import { fetchAll, createEntity } from "../api"; // Assuming you have this api helper
+import { fetchAll, createEntity, deleteEntity } from "../api";
 
 export default function StudentPage() {
   const [students, setStudents] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [semesters, setSemesters] = useState([]);
-  const [form, setForm] = useState({
-    rgNo: "", name: "", contact: "", email: "", gender: "", dob: "",
-    departmentId: "", semesterId: "",
-  });
+  const [form, setForm] = useState({ rgNo: "", name: "", contact: "", email: "", gender: "", dob: "", departmentId: "", semesterId: "" });
   const [error, setError] = useState(null);
 
   const loadData = async () => {
     try {
+      setError(null);
       const [studentsData, departmentsData, semestersData] = await Promise.all([
-        fetchAll("students"),
-        fetchAll("departments"),
-        fetchAll("semesters"),
+        fetchAll("students"), fetchAll("departments"), fetchAll("semesters"),
       ]);
       setStudents(Array.isArray(studentsData) ? studentsData : []);
       setDepartments(Array.isArray(departmentsData) ? departmentsData : []);
@@ -26,22 +22,27 @@ export default function StudentPage() {
 
   useEffect(() => { loadData(); }, []);
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const payload = {
-        ...form,
-        departmentId: Number(form.departmentId),
-        semesterId: Number(form.semesterId),
-      };
+      setError(null);
+      const payload = { ...form, departmentId: Number(form.departmentId), semesterId: Number(form.semesterId) };
       await createEntity("students", payload);
       setForm({ rgNo: "", name: "", contact: "", email: "", gender: "", dob: "", departmentId: "", semesterId: "" });
       loadData();
     } catch (err) { setError(err.response?.data?.message || "Failed to create student"); }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this student?")) {
+      try {
+        setError(null);
+        await deleteEntity("students", id);
+        loadData(); // Refresh the list after deleting
+      } catch (err) { setError(err.response?.data?.message || "Failed to delete student"); }
+    }
   };
 
   return (
@@ -67,17 +68,19 @@ export default function StudentPage() {
       </form>
       <table border="1">
         <thead>
-          <tr><th>ID</th><th>RegNo</th><th>Name</th><th>Email</th><th>Department</th><th>Semester</th></tr>
+          <tr>
+            <th>ID</th><th>RegNo</th><th>Name</th><th>Email</th><th>Department</th><th>Semester</th>
+            <th>Actions</th> {/* ✅ New Column */}
+          </tr>
         </thead>
         <tbody>
           {students.map((s) => (
             <tr key={s.id}>
-              <td>{s.id}</td>
-              <td>{s.rgNo}</td>
-              <td>{s.name}</td>
-              <td>{s.email}</td>
-              <td>{s.departmentName}</td>
-              <td>{s.semesterInfo}</td>
+              <td>{s.id}</td><td>{s.rgNo}</td><td>{s.name}</td><td>{s.email}</td>
+              <td>{s.departmentName}</td><td>{s.semesterInfo}</td>
+              <td> {/* ✅ New Cell with Delete Button */}
+                <button onClick={() => handleDelete(s.id)}>Delete</button>
+              </td>
             </tr>
           ))}
         </tbody>

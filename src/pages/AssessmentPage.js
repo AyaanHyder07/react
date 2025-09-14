@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchAll, createEntity } from "../api";
+import { fetchAll, createEntity, deleteEntity } from "../api";
 
 export default function AssessmentPage() {
   const [assessments, setAssessments] = useState([]);
@@ -8,6 +8,7 @@ export default function AssessmentPage() {
 
   const loadData = async () => {
     try {
+      setError(null);
       const data = await fetchAll("assessments");
       setAssessments(Array.isArray(data) ? data : []);
     } catch (err) { setError("Failed to load assessments"); }
@@ -15,17 +16,26 @@ export default function AssessmentPage() {
 
   useEffect(() => { loadData(); }, []);
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      setError(null);
       await createEntity("assessments", { ...form, marks: Number(form.marks), totalMarks: Number(form.totalMarks) });
       setForm({ number: "", date: "", marks: "", totalMarks: "" });
       loadData();
     } catch (err) { setError(err.response?.data?.message || "Failed to create assessment"); }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this assessment?")) {
+      try {
+        setError(null);
+        await deleteEntity("assessments", id);
+        loadData();
+      } catch (err) { setError(err.response?.data?.message || "Failed to delete assessment"); }
+    }
   };
 
   return (
@@ -41,16 +51,13 @@ export default function AssessmentPage() {
       </form>
       <table border="1">
         <thead>
-          <tr><th>ID</th><th>No</th><th>Date</th><th>Marks</th><th>Total</th></tr>
+          <tr><th>ID</th><th>No</th><th>Date</th><th>Marks</th><th>Total</th><th>Actions</th></tr>
         </thead>
         <tbody>
           {assessments.map((a) => (
             <tr key={a.id}>
-              <td>{a.id}</td>
-              <td>{a.number}</td>
-              <td>{a.date}</td>
-              <td>{a.marks}</td>
-              <td>{a.totalMarks}</td>
+              <td>{a.id}</td><td>{a.number}</td><td>{a.date}</td><td>{a.marks}</td><td>{a.totalMarks}</td>
+              <td><button onClick={() => handleDelete(a.id)}>Delete</button></td>
             </tr>
           ))}
         </tbody>

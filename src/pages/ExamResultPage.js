@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchAll, createEntity } from "../api";
+import { fetchAll, createEntity, deleteEntity } from "../api";
 
 export default function ExamResultPage() {
   const [examResults, setExamResults] = useState([]);
@@ -10,10 +10,9 @@ export default function ExamResultPage() {
 
   const loadData = async () => {
     try {
+      setError(null);
       const [resultsData, studentsData, examsData] = await Promise.all([
-        fetchAll("examresults"),
-        fetchAll("students"),
-        fetchAll("exams"),
+        fetchAll("examresults"), fetchAll("students"), fetchAll("exams"),
       ]);
       setExamResults(Array.isArray(resultsData) ? resultsData : []);
       setStudents(Array.isArray(studentsData) ? studentsData : []);
@@ -23,23 +22,27 @@ export default function ExamResultPage() {
 
   useEffect(() => { loadData(); }, []);
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const payload = { 
-        ...form, 
-        marks: Number(form.marks), 
-        examId: Number(form.examId), 
-        studentId: Number(form.studentId) 
-      };
+      setError(null);
+      const payload = { ...form, marks: Number(form.marks), examId: Number(form.examId), studentId: Number(form.studentId) };
       await createEntity("examresults", payload);
       setForm({ marks: "", grade: "", examId: "", studentId: "" });
       loadData();
     } catch (err) { setError(err.response?.data?.message || "Failed to create exam result"); }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this exam result?")) {
+      try {
+        setError(null);
+        await deleteEntity("examresults", id);
+        loadData();
+      } catch (err) { setError(err.response?.data?.message || "Failed to delete exam result"); }
+    }
   };
 
   return (
@@ -61,16 +64,13 @@ export default function ExamResultPage() {
       </form>
       <table border="1">
         <thead>
-          <tr><th>ID</th><th>Marks</th><th>Grade</th><th>Exam</th><th>Student</th></tr>
+          <tr><th>ID</th><th>Marks</th><th>Grade</th><th>Exam</th><th>Student</th><th>Actions</th></tr>
         </thead>
         <tbody>
           {examResults.map((er) => (
             <tr key={er.id}>
-              <td>{er.id}</td>
-              <td>{er.marks}</td>
-              <td>{er.grade}</td>
-              <td>{er.examName}</td>
-              <td>{er.studentName}</td>
+              <td>{er.id}</td><td>{er.marks}</td><td>{er.grade}</td><td>{er.examName}</td><td>{er.studentName}</td>
+              <td><button onClick={() => handleDelete(er.id)}>Delete</button></td>
             </tr>
           ))}
         </tbody>
