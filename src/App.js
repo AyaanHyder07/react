@@ -9,11 +9,13 @@ import ExamPage from "./pages/ExamPage";
 import ExamResultPage from "./pages/ExamResultPage";
 import FinalResultPage from "./pages/FinalResultPage";
 import "./App.css";
+import Header from "./components/Header";
 
 function App() {
   return (
     <Router>
       <div>
+        <Header/>
         <nav className="navbar">
           <Link to="/students">Students</Link>
           <Link to="/departments">Departments</Link>
