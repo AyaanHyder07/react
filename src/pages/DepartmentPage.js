@@ -8,7 +8,9 @@ export default function DepartmentPage() {
 
   const loadData = async () => {
     try {
-      setDepartments(await fetchAll("departments"));
+      const data = await fetchAll("departments");
+      // ✅ SAFEGUARD: Ensure data is an array before setting state
+      setDepartments(Array.isArray(data) ? data : []);
     } catch (err) {
       setError("Failed to load departments");
     }

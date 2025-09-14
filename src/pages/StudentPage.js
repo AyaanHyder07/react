@@ -6,35 +6,27 @@ export default function StudentPage() {
   const [departments, setDepartments] = useState([]);
   const [semesters, setSemesters] = useState([]);
   const [form, setForm] = useState({
-    rgNo: "",
-    name: "",
-    contact: "",
-    email: "",
-    gender: "",
-    dob: "",
-    departmentId: "",
-    semesterId: "",
+    rgNo: "", name: "", contact: "", email: "", gender: "", dob: "",
+    departmentId: "", semesterId: "",
   });
   const [error, setError] = useState(null);
 
- const loadData = async () => {
-  try {
-    const s = await fetchAll("students");
-    setStudents(Array.isArray(s) ? s : []);   // ensure array
-    const d = await fetchAll("departments");
-    setDepartments(Array.isArray(d) ? d : []);
-    const sem = await fetchAll("semesters");
-    setSemesters(Array.isArray(sem) ? sem : []);
-  } catch (err) {
-    console.error(err);
-    setError("Failed to load data");
-  }
-};
+  const loadData = async () => {
+    try {
+      const [studentsData, departmentsData, semestersData] = await Promise.all([
+        fetchAll("students"),
+        fetchAll("departments"),
+        fetchAll("semesters"),
+      ]);
+      setStudents(Array.isArray(studentsData) ? studentsData : []);
+      setDepartments(Array.isArray(departmentsData) ? departmentsData : []);
+      setSemesters(Array.isArray(semestersData) ? semestersData : []);
+    } catch (err) {
+      setError("Failed to load data");
+    }
+  };
 
-
-  useEffect(() => {
-    loadData();
-  }, []);
+  useEffect(() => { loadData(); }, []);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -44,26 +36,13 @@ export default function StudentPage() {
     e.preventDefault();
     try {
       const payload = {
-        rgNo: form.rgNo,
-        name: form.name,
-        contact: form.contact,
-        email: form.email,
-        gender: form.gender,
-        dob: form.dob,
-        department: { id: Number(form.departmentId) },
-        semester: { id: Number(form.semesterId) },
+        rgNo: form.rgNo, name: form.name, contact: form.contact, email: form.email,
+        gender: form.gender, dob: form.dob,
+        departmentId: Number(form.departmentId),
+        semesterId: Number(form.semesterId),
       };
       await createEntity("students", payload);
-      setForm({
-        rgNo: "",
-        name: "",
-        contact: "",
-        email: "",
-        gender: "",
-        dob: "",
-        departmentId: "",
-        semesterId: "",
-      });
+      setForm({ rgNo: "", name: "", contact: "", email: "", gender: "", dob: "", departmentId: "", semesterId: ""});
       loadData();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to create student");
@@ -73,6 +52,7 @@ export default function StudentPage() {
   return (
     <div>
       <h2>Students</h2>
+      
       {error && <div style={{ color: "red" }}>{error}</div>}
 
       <form onSubmit={handleSubmit}>
@@ -102,9 +82,7 @@ export default function StudentPage() {
 
       <table border="1">
         <thead>
-          <tr>
-            <th>ID</th><th>RegNo</th><th>Name</th><th>Email</th><th>Department</th><th>Semester</th>
-          </tr>
+          <tr><th>ID</th><th>RegNo</th><th>Name</th><th>Email</th><th>Department</th><th>Semester</th></tr>
         </thead>
         <tbody>
           {students.map((s) => (
@@ -113,8 +91,9 @@ export default function StudentPage() {
               <td>{s.rgNo}</td>
               <td>{s.name}</td>
               <td>{s.email}</td>
-              <td>{s.department?.name}</td>
-              <td>{s.semester?.sno}</td>
+              {/* ✅ UPDATED to match DTO fields */}
+              <td>{s.departmentName}</td>
+              <td>{s.semesterInfo}</td>
             </tr>
           ))}
         </tbody>

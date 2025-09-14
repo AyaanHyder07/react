@@ -5,24 +5,31 @@ export default function ExamResultPage() {
   const [examResults, setExamResults] = useState([]);
   const [students, setStudents] = useState([]);
   const [exams, setExams] = useState([]);
-  const [finalResults, setFinalResults] = useState([]);
   const [form, setForm] = useState({
     marks: "",
     grade: "",
     examId: "",
     studentId: "",
-    finalResultId: "",
   });
   const [error, setError] = useState(null);
 
   const loadData = async () => {
     try {
-      setExamResults(await fetchAll("examResults"));
-      setStudents(await fetchAll("students"));
-      setExams(await fetchAll("exams"));
-      setFinalResults(await fetchAll("finalResults"));
+      // Fetch all data concurrently
+      const [resultsData, studentsData, examsData] = await Promise.all([
+        fetchAll("examresults"),
+        fetchAll("students"),
+        fetchAll("exams"),
+      ]);
+
+      // ✅ SAFEGUARD: Ensure all fetched data is an array before setting state
+      setExamResults(Array.isArray(resultsData) ? resultsData : []);
+      setStudents(Array.isArray(studentsData) ? studentsData : []);
+      setExams(Array.isArray(examsData) ? examsData : []);
+      
     } catch (err) {
-      setError("Failed to load exam results");
+      console.error("Failed to load data:", err); // Log the full error for debugging
+      setError("Failed to load required data. Please try again.");
     }
   };
 
@@ -36,17 +43,17 @@ export default function ExamResultPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null); // Clear previous errors
     try {
       const payload = {
         marks: Number(form.marks),
         grade: form.grade,
-        exam: { id: Number(form.examId) },
-        student: { id: Number(form.studentId) },
-        finalResult: { id: Number(form.finalResultId) },
+        examId: Number(form.examId),
+        studentId: Number(form.studentId),
       };
-      await createEntity("examResults", payload);
-      setForm({ marks: "", grade: "", examId: "", studentId: "", finalResultId: "" });
-      loadData();
+      await createEntity("examresults", payload);
+      setForm({ marks: "", grade: "", examId: "", studentId: "" });
+      loadData(); // Refresh data after successful creation
     } catch (err) {
       setError(err.response?.data?.message || "Failed to create exam result");
     }
@@ -75,17 +82,10 @@ export default function ExamResultPage() {
           ))}
         </select>
 
-        <select name="finalResultId" value={form.finalResultId} onChange={handleChange}>
-          <option value="">Select Final Result</option>
-          {finalResults.map((f) => (
-            <option key={f.id} value={f.id}>{f.id}</option>
-          ))}
-        </select>
-
         <button type="submit">Add Exam Result</button>
       </form>
 
-      <table border="1">
+       <table border="1">
         <thead>
           <tr><th>ID</th><th>Marks</th><th>Grade</th><th>Exam</th><th>Student</th></tr>
         </thead>
@@ -95,8 +95,9 @@ export default function ExamResultPage() {
               <td>{er.id}</td>
               <td>{er.marks}</td>
               <td>{er.grade}</td>
-              <td>{er.exam?.name}</td>
-              <td>{er.student?.name}</td>
+              {/* ✅ UPDATED to match DTO fields */}
+              <td>{er.examName}</td>
+              <td>{er.studentName}</td>
             </tr>
           ))}
         </tbody>

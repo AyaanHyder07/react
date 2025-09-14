@@ -64,11 +64,11 @@ export default function SubjectPage() {
         <input name="credits" value={form.credits} onChange={handleChange} placeholder="Credits" />
         <input name="duration" value={form.duration} onChange={handleChange} placeholder="Duration" />
 
-        <select multiple value={form.assessmentIds} onChange={handleAssessmentChange}>
+        {/* <select multiple value={form.assessmentIds} onChange={handleAssessmentChange}>
           {assessments.map((a) => (
             <option key={a.id} value={a.id}>{a.number}</option>
           ))}
-        </select>
+        </select> */}
 
         <button type="submit">Add Subject</button>
       </form>

@@ -8,7 +8,9 @@ export default function SemesterPage() {
 
   const loadData = async () => {
     try {
-      setSemesters(await fetchAll("semesters"));
+      const data = await fetchAll("semesters");
+      // ✅ SAFEGUARD: Ensure data is an array before setting state
+      setSemesters(Array.isArray(data) ? data : []);
     } catch (err) {
       setError("Failed to load semesters");
     }
@@ -26,9 +28,9 @@ export default function SemesterPage() {
     e.preventDefault();
     try {
       await createEntity("semesters", {
-        sno: Number(form.sno),
+        sno: form.sno, // Assuming sno is a string like "1st", if it's a number, convert it
         stage: form.stage,
-        endYear: form.endYear,
+        endYear: Number(form.endYear),
       });
       setForm({ sno: "", stage: "", endYear: "" });
       loadData();

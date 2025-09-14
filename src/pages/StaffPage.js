@@ -15,10 +15,13 @@ export default function StaffPage() {
 
   const loadData = async () => {
     try {
-      setStaff(await fetchAll("staff"));
-      setDepartments(await fetchAll("departments"));
+      const staffData = await fetchAll("staff");
+      const departmentsData = await fetchAll("departments");
+      // ✅ SAFEGUARD: Ensure data is an array before setting state
+      setStaff(Array.isArray(staffData) ? staffData : []);
+      setDepartments(Array.isArray(departmentsData) ? departmentsData : []);
     } catch (err) {
-      setError("Failed to load staff");
+      setError("Failed to load data");
     }
   };
 
@@ -38,7 +41,7 @@ export default function StaffPage() {
         role: form.role,
         phone: form.phone,
         address: form.address,
-        department: { id: Number(form.departmentId) },
+        departmentId: Number(form.departmentId),
       };
       await createEntity("staff", payload);
       setForm({ name: "", role: "", phone: "", address: "", departmentId: "" });
@@ -54,10 +57,10 @@ export default function StaffPage() {
       {error && <div style={{ color: "red" }}>{error}</div>}
 
       <form onSubmit={handleSubmit}>
-        <input name="name" value={form.name} onChange={handleChange} placeholder="Name" />
-        <input name="role" value={form.role} onChange={handleChange} placeholder="Role" />
-        <input name="phone" value={form.phone} onChange={handleChange} placeholder="Phone" />
-        <input name="address" value={form.address} onChange={handleChange} placeholder="Address" />
+        <input name="name" value={form.name} onChange={handleChange} placeholder="Name"/>
+        <input name="role" value={form.role} onChange={handleChange} placeholder="Role"/>
+        <input name="phone" value={form.phone} onChange={handleChange} placeholder="Phone"/>
+        <input name="address" value={form.address} onChange={handleChange} placeholder="Address"/>
 
         <select name="departmentId" value={form.departmentId} onChange={handleChange}>
           <option value="">Select Department</option>
@@ -65,7 +68,6 @@ export default function StaffPage() {
             <option key={d.id} value={d.id}>{d.name}</option>
           ))}
         </select>
-        
 
         <button type="submit">Add Staff</button>
       </form>
@@ -81,7 +83,8 @@ export default function StaffPage() {
               <td>{s.name}</td>
               <td>{s.role}</td>
               <td>{s.phone}</td>
-              <td>{s.department?.name}</td>
+              {/* ✅ UPDATED to match DTO field */}
+              <td>{s.departmentName}</td>
             </tr>
           ))}
         </tbody>

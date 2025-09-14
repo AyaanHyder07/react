@@ -17,11 +17,16 @@ export default function FinalResultPage() {
 
   const loadData = async () => {
     try {
-      setFinalResults(await fetchAll("finalResults"));
-      setStudents(await fetchAll("students"));
-      setSemesters(await fetchAll("semesters"));
+      const resultsData = await fetchAll("finalresults");
+      const studentsData = await fetchAll("students");
+      const semestersData = await fetchAll("semesters");
+      
+      // ✅ SAFEGUARD: Ensure all fetched data is an array
+      setFinalResults(Array.isArray(resultsData) ? resultsData : []);
+      setStudents(Array.isArray(studentsData) ? studentsData : []);
+      setSemesters(Array.isArray(semestersData) ? semestersData : []);
     } catch (err) {
-      setError("Failed to load final results");
+      setError("Failed to load final results data");
     }
   };
 
@@ -41,10 +46,10 @@ export default function FinalResultPage() {
         total: Number(form.total),
         percentage: Number(form.percentage),
         grade: form.grade,
-        student: { id: Number(form.studentId) },
-        semester: { id: Number(form.semesterId) },
+        studentId: Number(form.studentId),
+        semesterId: Number(form.semesterId),
       };
-      await createEntity("finalResults", payload);
+      await createEntity("finalresults", payload);
       setForm({ subTotal: "", total: "", percentage: "", grade: "", studentId: "", semesterId: "" });
       loadData();
     } catch (err) {
@@ -65,33 +70,32 @@ export default function FinalResultPage() {
 
         <select name="studentId" value={form.studentId} onChange={handleChange}>
           <option value="">Select Student</option>
-          {students.map((s) => (
-            <option key={s.id} value={s.id}>{s.name}</option>
-          ))}
+          {students.map((s) => (<option key={s.id} value={s.id}>{s.name}</option>))}
         </select>
 
         <select name="semesterId" value={form.semesterId} onChange={handleChange}>
           <option value="">Select Semester</option>
-          {semesters.map((sem) => (
-            <option key={sem.id} value={sem.id}>{sem.sno} - {sem.stage}</option>
-          ))}
+          {semesters.map((sem) => (<option key={sem.id} value={sem.id}>{sem.sno} - {sem.stage}</option>))}
         </select>
 
         <button type="submit">Add Final Result</button>
       </form>
 
-      <table border="1">
+       <table border="1">
         <thead>
-          <tr><th>ID</th><th>Total</th><th>Percentage</th><th>Grade</th><th>Student</th></tr>
+          <tr><th>ID</th><th>Sub Total</th><th>Total</th><th>Percentage</th><th>Grade</th><th>Student</th><th>Semester</th></tr>
         </thead>
         <tbody>
           {finalResults.map((fr) => (
             <tr key={fr.id}>
               <td>{fr.id}</td>
+              <td>{fr.subTotal}</td>
               <td>{fr.total}</td>
               <td>{fr.percentage}</td>
               <td>{fr.grade}</td>
-              <td>{fr.student?.name}</td>
+              {/* ✅ UPDATED to match DTO fields */}
+              <td>{fr.studentName}</td>
+              <td>{fr.semesterInfo}</td>
             </tr>
           ))}
         </tbody>
