@@ -10,6 +10,7 @@ import ExamResultPage from "./pages/ExamResultPage";
 import FinalResultPage from "./pages/FinalResultPage";
 import "./App.css";
 import Header from "./components/Header";
+import Footer from "./components/Footer";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
           <Link to="/examResults">Exam Results</Link>
           <Link to="/finalResults">Final Results</Link>
         </nav>
+        <Footer/>
 
         <div className="content">
           <Routes>
