@@ -17,7 +17,8 @@ function LoginPortal() {
     setLoading(true);
     try {
       await login(email, password);
-      navigate("/dashboard/students"); 
+      navigate("/dashboard"); 
+
     } catch (err) {
       const errorMessage = err.response?.data?.message || "Login failed. Please check your credentials.";
       setError(errorMessage);

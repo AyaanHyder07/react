@@ -1,70 +1,100 @@
-# Getting Started with Create React App
+# Student & Staff Management System
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This is a complete full-stack web application with a **Spring Boot 3** backend and a **React.js** frontend. The project offers a secure, multi-user portal for managing academic data, including students, staff, departments, exams, and results.
 
-## Available Scripts
+The system includes a secure JWT-based authentication system for both "Student" and "Staff" user roles and provides a full set of CRUD (Create, Read, Update, Delete) operations for nine core database entities.
 
-In the project directory, you can run:
+## Features
 
-### `npm start`
+* **Secure JWT Authentication:** A full login and registration system using Spring Security and JSON Web Tokens (JWT).
+* **Role-Based Registration:** Different registration processes for **Students** (requiring a Registration No.) and **Staff** (requiring a professional role).
+* **Protected Dashboard:** All data management pages are secure and accessible only by authenticated users.
+* **Full CRUD Functionality:** Complete Create, Read, Update, and Delete operations for all nine core entities.
+* **Clean API Architecture:** Uses the **DTO (Data Transfer Object) Pattern** for all API communication, fully separating the backend entities from the frontend.
+* **Automated Auth Handling:** Frontend API service uses an `axios` interceptor to automatically add the JWT auth token to every secure API request.
+* **Centralized Error Handling:** A `GlobalExceptionHandler` on the backend delivers clean, predictable JSON error responses for all API errors.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Tech Stack
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+| Backend | Frontend | Database |
+| :--- | :--- | :--- |
+| Spring Boot | React.js | MySQL |
+| Spring Security | React Router DOM v6 | |
+| Spring Data JPA (Hibernate) | Axios | |
+| Java 17+ | CSS3 | |
+| Maven | Node.js / npm | |
+| JWT (jjwt library) | | |
 
-### `npm test`
+## Project Architecture
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+This project uses a modern, decoupled architecture.
 
-### `npm run build`
+* **Backend:** A strong Spring Boot REST API. It follows a classic three-tier pattern:
+    * `@RestController`: Handles all HTTP requests and routes.
+    * `@Service`: Contains all business logic. All methods that write to the database are marked as `@Transactional`.
+    * `@Repository`: Standard Spring Data JPA interfaces for database operations.
+* **DTO Pattern:** The backend **never** exposes JPA entities directly through the API. All data is transferred using simple POJO DTOs (e.g., `StudentDTO`). This prevents serialization errors, lazy-loading exceptions, and infinite loops.
+* **Frontend:** A React single-page application (SPA).
+    * **Services:** All API communication takes place in `src/services/apiService.js`. This file has an `axios` interceptor that automatically adds the JWT from `localStorage` to every request.
+    * **Routing:** Uses `react-router-dom` for navigation. A custom `<ProtectedRoute />` component protects the main dashboard, redirecting unauthenticated users to the login page.
+    * **State:** Utilizes React Hooks (`useState`, `useEffect`) to manage component-level state. Data tables update instantly on the client side after successful Create, Update, or Delete operations.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Setup and Installation
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+You need to run both the backend and frontend servers to use this application.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### 1. Backend (Spring Boot) Setup
 
-### `npm run eject`
+1. **Prerequisites:** Java (JDK 17 or newer), Maven, and a running MySQL server.
+2. **Database Setup:** Create a new, empty database in MySQL (e.g., `fsd_project_db`).
+3. **Configure:** Open the `src/main/resources/application.properties` file and update it with your database credentials and a secure JWT secret:
+    ```properties
+    # Database Configuration
+    spring.datasource.url=jdbc:mysql://localhost:3306/fsd_project_db
+    spring.datasource.username=YOUR_MYSQL_USERNAME
+    spring.datasource.password=YOUR_MYSQL_PASSWORD
+    
+    # This will create or update tables based on your entities. Use 'create' for a fresh start.
+    spring.jpa.hibernate.ddl-auto=update
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+    # JWT Configuration (This key is a secure sample, you can use it)
+    jwt.secret.key=ZDY4ZWE1ZWE4N2M1YjZlOGI4YjZkODU3Y2RhZDY0ZWM3ZDE2NDM3Y2ZkZjc4ZmM5ZWY3ODc3MGVlODNjYWVkMw==
+    jwt.expiration.ms=86400000
+    ```
+4. **Install Dependencies:** Run `mvn clean install` to download all dependencies.
+5. **Run:** Start the application by running the main `ProjectApplication.java` file or by using the command: `mvn spring-boot:run`.
+    * The server will start on `http://localhost:8080`.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### 2. Frontend (React) Setup
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+1. **Prerequisites:** Node.js and npm.
+2. **Navigate:** Open a terminal in the frontend project folder (the one containing `package.json`).
+3. **Install Dependencies:**
+    ```bash
+    npm install
+    ```
+4. **Run:**
+    ```bash
+    npm start
+    ```
+    * The application will open automatically in your browser at `http://localhost:3000`.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## API Endpoints
 
-## Learn More
+The backend provides a full REST API.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+#### Authentication API (Public)
+* `POST /api/auth/register` - Creates a new Student or Staff account.
+* `POST /api/auth/login` - Authenticates a user and returns a JWT.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+#### Main API (Protected by JWT)
+All main data routes start with `/api/v1` and offer full CRUD functionality.
+* `/api/v1/students`
+* `/api/v1/departments`
+* `/api/v1/semesters`
+* `/api/v1/staff`
+* `/api/v1/subjects`
+* `/api/v1/assessments`
+* `/api/v1/exams`
+* `/api/v1/examresults`
+*

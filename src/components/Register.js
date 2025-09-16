@@ -36,7 +36,7 @@ function Register() {
         localStorage.setItem('user_token', JSON.stringify(response.data.token));
       }
       
-      navigate("/dashboard/students");
+       navigate("/dashboard");  
     } catch (err) {
       const errorMessage = err.response?.data?.message || "Registration failed. Please try again.";
       setError(errorMessage);

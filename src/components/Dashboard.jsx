@@ -2,6 +2,14 @@ import React from "react";
 import { NavLink, Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import { logout } from "../services/apiService";
 import "./Dashboard.css";
+
+// ❌ DO NOT import the public Header and Footer here
+// import Header from "./Header"; 
+// import Footer from "./Footer";
+
+import Main from "./Main"; 
+
+// Import all your pages
 import StudentPage from "../pages/StudentPage";
 import DepartmentPage from "../pages/DepartmentPage";
 import SemesterPage from "../pages/SemesterPage";
@@ -11,19 +19,21 @@ import AssessmentPage from "../pages/AssessmentPage";
 import ExamPage from "../pages/ExamPage";
 import ExamResultPage from "../pages/ExamResultPage";
 import FinalResultPage from "../pages/FinalResultPage";
-import Header from "./Header"
-import Footer from "./Footer"
-// import Slogen from "./Slogan"
+import HeaderDashboard from "./HeaderDashboard";
+import FooterDashboard from "./FooterDashboard";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
+
   return (
     <>
-    <Header/>
+    <HeaderDashboard/>
+      {/* 1. We removed the old <Header />. This is your ONLY header now. */}
       <header className="dashboard-header">
         <nav className="navbar">
           <NavLink to="/dashboard/students">Students</NavLink>
@@ -38,11 +48,11 @@ const Dashboard = () => {
         </nav>
         <button onClick={handleLogout} className="logout-btn">Logout</button>
       </header>
-      {/* <Slogen/> */}
-      <Footer/>
+
+      {/* 2. Your page content will render here, in the middle. */}
       <main className="content">
         <Routes>
-          <Route index element={<Navigate to="/dashboard/students" replace />} />
+          <Route index element={<Main />} /> 
           <Route path="students" element={<StudentPage />} />
           <Route path="departments" element={<DepartmentPage />} />
           <Route path="semesters" element={<SemesterPage />} />
@@ -54,7 +64,11 @@ const Dashboard = () => {
           <Route path="finalResults" element={<FinalResultPage />} />
         </Routes>
       </main>
-      </>
+
+      {/* 3. We removed the old <Footer />. The app ends after the content. */}
+      <FooterDashboard/>
+    </>
   );
 };
+
 export default Dashboard;

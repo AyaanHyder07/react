@@ -1,8 +1,13 @@
 import React from "react";
 import "../styles/Main.css";
+import "../styles/Slogen.css"; 
 
 const Main = () => (
+  
   <section className="hero">
+    <div className="slogan">
+    "Empowering Minds, Shaping the Future"
+  </div>
     <div className="hero-content">
       <div className="hero-text">
         <section className="welcome">
@@ -12,7 +17,7 @@ const Main = () => (
             to empower our students for a brighter tomorrow. Our goal is to nurture talent,
             innovation, and character.
           </p>
-          <a href="LOGIN.HTML" className="hero-button">Get Started</a>
+          
         </section>
       </div>
       <div className="hero-image">
