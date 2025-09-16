@@ -24,11 +24,9 @@ export const fetchAll = (entity) => apiClient.get(`/${entity}`);
 export const createEntity = (entity, data) => apiClient.post(`/${entity}`, data);
 export const deleteEntity = (entity, id) => apiClient.delete(`/${entity}/${id}`);
 
-// ✅ FIX: Added the missing update function that was causing the import error
 export const updateEntity = (entity, id, data) => apiClient.put(`/${entity}/${id}`, data);
 
 
-// --- Authentication Operations ---
 const AUTH_URL = 'http://localhost:8080/api/auth';
 
 export const login = async (email, password) => {

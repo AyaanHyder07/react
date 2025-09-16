@@ -23,9 +23,8 @@ export default function SemesterPage() {
     try {
       setError(null);
       
-      // ✅ FINAL FIX: Get the 'data' property from the response
       const response = await createEntity("semesters", { ...form, endYear: Number(form.endYear) });
-      const newSemester = response.data; // This is the new Semester DTO
+      const newSemester = response.data;
 
       setSemesters(currentSemesters => [...currentSemesters, newSemester]);
       setForm({ sno: "", stage: "", endYear: "" });

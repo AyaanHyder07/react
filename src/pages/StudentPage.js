@@ -30,14 +30,13 @@ export default function StudentPage() {
   const handleEdit = (student) => {
     setEditingId(student.id);
     
-    // ✅ FIX: Logic to find IDs moved *outside* the setForm call
     const dept = departments.find(d => d.name === student.departmentName);
     const sem = semesters.find(s => (s.sno + " - " + s.stage) === student.semesterInfo);
 
     setForm({
       rgNo: student.rgNo,
       name: student.name,
-      contact: student.contact || "", // Handle potential null values
+      contact: student.contact || "", 
       email: student.email,
       gender: student.gender || "",
       dob: student.dob || "",

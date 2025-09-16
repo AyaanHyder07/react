@@ -23,9 +23,8 @@ export default function AssessmentPage() {
     try {
       setError(null);
 
-      // ✅ FINAL FIX: Get the 'data' property from the response
       const response = await createEntity("assessments", { ...form, marks: Number(form.marks), totalMarks: Number(form.totalMarks) });
-      const newAssessment = response.data; // This is the new Assessment DTO
+      const newAssessment = response.data; 
 
       setAssessments(currentAssessments => [...currentAssessments, newAssessment]);
       setForm({ number: "", date: "", marks: "", totalMarks: "" });

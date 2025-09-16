@@ -31,10 +31,8 @@ export default function StaffPage() {
   const handleEdit = (staffMember) => {
     setEditingId(staffMember.id);
     
-    // ✅ FIX: Find the department ID *before* calling setForm
     const dept = departments.find(d => d.name === staffMember.departmentName);
     
-    // ✅ FIX: This logic is now outside the setForm call, correcting the syntax error
     setForm({ 
       name: staffMember.name,
       role: staffMember.role,

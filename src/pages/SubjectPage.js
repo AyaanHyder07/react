@@ -23,9 +23,8 @@ export default function SubjectPage() {
     try {
       setError(null);
 
-      // ✅ FINAL FIX: Get the 'data' property from the response
       const response = await createEntity("subjects", { ...form, credits: Number(form.credits), duration: Number(form.duration) });
-      const newSubject = response.data; // This is the new Subject DTO
+      const newSubject = response.data; 
 
       setSubjects(currentSubjects => [...currentSubjects, newSubject]);
       setForm({ code: "", name: "", credits: "", duration: "" });

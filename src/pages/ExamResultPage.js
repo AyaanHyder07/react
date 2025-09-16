@@ -30,9 +30,8 @@ export default function ExamResultPage() {
       setError(null);
       const payload = { ...form, marks: Number(form.marks), examId: Number(form.examId), studentId: Number(form.studentId) };
       
-      // ✅ FINAL FIX: Get the 'data' property from the response
       const response = await createEntity("examresults", payload);
-      const newResult = response.data; // This is the new ExamResult DTO
+      const newResult = response.data; 
 
       setExamResults(currentResults => [...currentResults, newResult]);
       setForm({ marks: "", grade: "", examId: "", studentId: "" });

@@ -23,9 +23,8 @@ export default function DepartmentPage() {
     try {
       setError(null);
       
-      // ✅ FINAL FIX: Get the 'data' property from the response
       const response = await createEntity("departments", { ...form, intake: Number(form.intake) });
-      const newDepartment = response.data; // This is the new Department DTO
+      const newDepartment = response.data; 
 
       setDepartments(currentDepartments => [...currentDepartments, newDepartment]);
       setForm({ name: "", intake: "", hod: "" });

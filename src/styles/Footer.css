@@ -10,8 +10,8 @@
   text-align: center;
   font-size: 13px;
   color: #ccc;
-  border: none;      /* remove line */
-  margin: 0;         /* reset margin */
-  padding: 10,10,10,10;        /* reset padding */
-  line-height: 1;    /* tighter spacing */
+  border: none;    
+  margin: 0;         
+  padding: 10,10,10,10;    
+  line-height: 1;    
 }

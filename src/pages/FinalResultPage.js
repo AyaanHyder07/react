@@ -35,9 +35,8 @@ export default function FinalResultPage() {
         semesterId: Number(form.semesterId),
       };
       
-      // ✅ FINAL FIX: Get the 'data' property from the response
       const response = await createEntity("finalresults", payload);
-      const newResult = response.data; // This is the new FinalResult DTO
+      const newResult = response.data; 
 
       setFinalResults(currentResults => [...currentResults, newResult]);
       setForm({ subTotal: "", total: "", percentage: "", grade: "", studentId: "", semesterId: "" });

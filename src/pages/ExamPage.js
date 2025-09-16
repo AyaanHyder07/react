@@ -23,9 +23,8 @@ export default function ExamPage() {
     try {
       setError(null);
 
-      // ✅ FINAL FIX: Get the 'data' property from the response
       const response = await createEntity("exams", { ...form, totalMarks: Number(form.totalMarks) });
-      const newExam = response.data; // This is the new Exam DTO
+      const newExam = response.data; 
 
       setExams(currentExams => [...currentExams, newExam]);
       setForm({ name: "", date: "", type: "", totalMarks: "" });

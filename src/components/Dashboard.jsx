@@ -2,14 +2,7 @@ import React from "react";
 import { NavLink, Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import { logout } from "../services/apiService";
 import "./Dashboard.css";
-
-// ❌ DO NOT import the public Header and Footer here
-// import Header from "./Header"; 
-// import Footer from "./Footer";
-
 import Main from "./Main"; 
-
-// Import all your pages
 import StudentPage from "../pages/StudentPage";
 import DepartmentPage from "../pages/DepartmentPage";
 import SemesterPage from "../pages/SemesterPage";
@@ -33,7 +26,6 @@ const Dashboard = () => {
   return (
     <>
     <HeaderDashboard/>
-      {/* 1. We removed the old <Header />. This is your ONLY header now. */}
       <header className="dashboard-header">
         <nav className="navbar">
           <NavLink to="/dashboard/students">Students</NavLink>
@@ -49,7 +41,6 @@ const Dashboard = () => {
         <button onClick={handleLogout} className="logout-btn">Logout</button>
       </header>
 
-      {/* 2. Your page content will render here, in the middle. */}
       <main className="content">
         <Routes>
           <Route index element={<Main />} /> 
@@ -64,8 +55,6 @@ const Dashboard = () => {
           <Route path="finalResults" element={<FinalResultPage />} />
         </Routes>
       </main>
-
-      {/* 3. We removed the old <Footer />. The app ends after the content. */}
       <FooterDashboard/>
     </>
   );
