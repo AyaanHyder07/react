@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchAll, createEntity, deleteEntity } from "../api";
+import { fetchAll, createEntity, deleteEntity } from "../services/apiService";
 
 export default function SemesterPage() {
   const [semesters, setSemesters] = useState([]);
@@ -9,8 +9,8 @@ export default function SemesterPage() {
   const loadData = async () => {
     try {
       setError(null);
-      const data = await fetchAll("semesters");
-      setSemesters(Array.isArray(data) ? data : []);
+      const response = await fetchAll("semesters");
+      setSemesters(Array.isArray(response.data) ? response.data : []);
     } catch (err) { setError("Failed to load semesters"); }
   };
 
@@ -22,9 +22,13 @@ export default function SemesterPage() {
     e.preventDefault();
     try {
       setError(null);
-      await createEntity("semesters", { ...form, endYear: Number(form.endYear) });
+      
+      // ✅ FINAL FIX: Get the 'data' property from the response
+      const response = await createEntity("semesters", { ...form, endYear: Number(form.endYear) });
+      const newSemester = response.data; // This is the new Semester DTO
+
+      setSemesters(currentSemesters => [...currentSemesters, newSemester]);
       setForm({ sno: "", stage: "", endYear: "" });
-      loadData();
     } catch (err) { setError(err.response?.data?.message || "Failed to create semester"); }
   };
 
@@ -33,20 +37,22 @@ export default function SemesterPage() {
       try {
         setError(null);
         await deleteEntity("semesters", id);
-        loadData();
+        setSemesters(currentSemesters => currentSemesters.filter(s => s.id !== id));
       } catch (err) { setError(err.response?.data?.message || "Failed to delete semester"); }
     }
   };
 
   return (
     <div>
-      <h2>Semesters</h2>
-      {error && <div style={{ color: "red" }}>{error}</div>}
-      <form onSubmit={handleSubmit}><input name="sno" value={form.sno} onChange={handleChange} placeholder="S.No" />
-        <input name="stage" value={form.stage} onChange={handleChange} placeholder="Stage" />
-        <input name="endYear" value={form.endYear} onChange={handleChange} placeholder="End Year" />
-        <button type="submit">Add Semester</button></form>
-      <table border="1">
+      <h3>Semesters</h3>
+      {error && <div style={{ color: "red", marginBottom: "10px" }}>{error}</div>}
+      <form onSubmit={handleSubmit} style={{ marginBottom: "20px" }}>
+        <input name="sno" value={form.sno} onChange={handleChange} placeholder="S.No" required />
+        <input name="stage" value={form.stage} onChange={handleChange} placeholder="Stage" required />
+        <input name="endYear" type="number" value={form.endYear} onChange={handleChange} placeholder="End Year" required />
+        <button type="submit">Add Semester</button>
+      </form>
+      <table border="1" style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
           <tr><th>ID</th><th>S.No</th><th>Stage</th><th>End Year</th><th>Actions</th></tr>
         </thead>

@@ -1,49 +1,28 @@
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import StudentPage from "./pages/StudentPage";
-import DepartmentPage from "./pages/DepartmentPage";
-import SemesterPage from "./pages/SemesterPage";
-import StaffPage from "./pages/StaffPage";
-import SubjectPage from "./pages/SubjectPage";
-import AssessmentPage from "./pages/AssessmentPage";
-import ExamPage from "./pages/ExamPage";
-import ExamResultPage from "./pages/ExamResultPage";
-import FinalResultPage from "./pages/FinalResultPage";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import "./App.css";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
+
+// Import Components
+import LoginPortal from './components/LoginPortal';
+import Register from './components/Register';
+import Dashboard from './components/Dashboard';
+import ProtectedRoute from './components/ProtectedRoute'; // ✅ Import the guard
 
 function App() {
   return (
     <Router>
-      <div>
-        <Header/>
-        <nav className="navbar">
-          <Link to="/students">Students</Link>
-          <Link to="/departments">Departments</Link>
-          <Link to="/semesters">Semesters</Link>
-          <Link to="/staff">Staff</Link>
-          <Link to="/subjects">Subjects</Link>
-          <Link to="/assessments">Assessments</Link>
-          <Link to="/exams">Exams</Link>
-          <Link to="/examResults">Exam Results</Link>
-          <Link to="/finalResults">Final Results</Link>
-        </nav>
-        <Footer/>
+      <Routes>
+        {/* These routes are PUBLIC */}
+        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/login" element={<LoginPortal />} />
+        <Route path="/register" element={<Register />} />
 
-        <div className="content">
-          <Routes>
-            <Route path="/students" element={<StudentPage />} />
-            <Route path="/departments" element={<DepartmentPage />} />
-            <Route path="/semesters" element={<SemesterPage />} />
-            <Route path="/staff" element={<StaffPage />} />
-            <Route path="/subjects" element={<SubjectPage />} />
-            <Route path="/assessments" element={<AssessmentPage />} />
-            <Route path="/exams" element={<ExamPage />} />
-            <Route path="/examResults" element={<ExamResultPage />} />
-            <Route path="/finalResults" element={<FinalResultPage />} />
-          </Routes>
-        </div>
-      </div>
+        {/* ✅ All routes wrapped by ProtectedRoute will require login */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard/*" element={<Dashboard />} />
+        </Route>
+
+      </Routes>
     </Router>
   );
 }

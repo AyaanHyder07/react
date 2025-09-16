@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchAll, createEntity, deleteEntity } from "../api";
+import { fetchAll, createEntity, deleteEntity } from "../services/apiService";
 
 export default function ExamResultPage() {
   const [examResults, setExamResults] = useState([]);
@@ -11,12 +11,12 @@ export default function ExamResultPage() {
   const loadData = async () => {
     try {
       setError(null);
-      const [resultsData, studentsData, examsData] = await Promise.all([
+      const [resultsResponse, studentsResponse, examsResponse] = await Promise.all([
         fetchAll("examresults"), fetchAll("students"), fetchAll("exams"),
       ]);
-      setExamResults(Array.isArray(resultsData) ? resultsData : []);
-      setStudents(Array.isArray(studentsData) ? studentsData : []);
-      setExams(Array.isArray(examsData) ? examsData : []);
+      setExamResults(Array.isArray(resultsResponse.data) ? resultsResponse.data : []);
+      setStudents(Array.isArray(studentsResponse.data) ? studentsResponse.data : []);
+      setExams(Array.isArray(examsResponse.data) ? examsResponse.data : []);
     } catch (err) { setError("Failed to load data"); }
   };
 
@@ -29,9 +29,13 @@ export default function ExamResultPage() {
     try {
       setError(null);
       const payload = { ...form, marks: Number(form.marks), examId: Number(form.examId), studentId: Number(form.studentId) };
-      await createEntity("examresults", payload);
+      
+      // ✅ FINAL FIX: Get the 'data' property from the response
+      const response = await createEntity("examresults", payload);
+      const newResult = response.data; // This is the new ExamResult DTO
+
+      setExamResults(currentResults => [...currentResults, newResult]);
       setForm({ marks: "", grade: "", examId: "", studentId: "" });
-      loadData();
     } catch (err) { setError(err.response?.data?.message || "Failed to create exam result"); }
   };
 
@@ -40,29 +44,29 @@ export default function ExamResultPage() {
       try {
         setError(null);
         await deleteEntity("examresults", id);
-        loadData();
+        setExamResults(currentResults => currentResults.filter(er => er.id !== id));
       } catch (err) { setError(err.response?.data?.message || "Failed to delete exam result"); }
     }
   };
 
   return (
     <div>
-      <h2>Exam Results</h2>
-      {error && <div style={{ color: "red" }}>{error}</div>}
-      <form onSubmit={handleSubmit}>
-        <input name="marks" value={form.marks} onChange={handleChange} placeholder="Marks" />
+      <h3>Exam Results</h3>
+      {error && <div style={{ color: "red", marginBottom: "10px" }}>{error}</div>}
+      <form onSubmit={handleSubmit} style={{ marginBottom: "20px" }}>
+        <input name="marks" type="number" value={form.marks} onChange={handleChange} placeholder="Marks" />
         <input name="grade" value={form.grade} onChange={handleChange} placeholder="Grade" />
-        <select name="examId" value={form.examId} onChange={handleChange}>
+        <select name="examId" value={form.examId} onChange={handleChange} required>
           <option value="">Select Exam</option>
           {exams.map((e) => (<option key={e.id} value={e.id}>{e.name}</option>))}
         </select>
-        <select name="studentId" value={form.studentId} onChange={handleChange}>
+        <select name="studentId" value={form.studentId} onChange={handleChange} required>
           <option value="">Select Student</option>
           {students.map((s) => (<option key={s.id} value={s.id}>{s.name}</option>))}
         </select>
         <button type="submit">Add Exam Result</button>
       </form>
-      <table border="1">
+      <table border="1" style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
           <tr><th>ID</th><th>Marks</th><th>Grade</th><th>Exam</th><th>Student</th><th>Actions</th></tr>
         </thead>

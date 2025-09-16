@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchAll, createEntity, deleteEntity } from "../api";
+import { fetchAll, createEntity, deleteEntity } from "../services/apiService";
 
 export default function DepartmentPage() {
   const [departments, setDepartments] = useState([]);
@@ -9,8 +9,8 @@ export default function DepartmentPage() {
   const loadData = async () => {
     try {
       setError(null);
-      const data = await fetchAll("departments");
-      setDepartments(Array.isArray(data) ? data : []);
+      const response = await fetchAll("departments");
+      setDepartments(Array.isArray(response.data) ? response.data : []);
     } catch (err) { setError("Failed to load departments"); }
   };
 
@@ -22,9 +22,13 @@ export default function DepartmentPage() {
     e.preventDefault();
     try {
       setError(null);
-      await createEntity("departments", { ...form, intake: Number(form.intake) });
+      
+      // ✅ FINAL FIX: Get the 'data' property from the response
+      const response = await createEntity("departments", { ...form, intake: Number(form.intake) });
+      const newDepartment = response.data; // This is the new Department DTO
+
+      setDepartments(currentDepartments => [...currentDepartments, newDepartment]);
       setForm({ name: "", intake: "", hod: "" });
-      loadData();
     } catch (err) { setError(err.response?.data?.message || "Failed to create department"); }
   };
 
@@ -33,22 +37,22 @@ export default function DepartmentPage() {
       try {
         setError(null);
         await deleteEntity("departments", id);
-        loadData();
+        setDepartments(currentDepartments => currentDepartments.filter(d => d.id !== id));
       } catch (err) { setError(err.response?.data?.message || "Failed to delete department"); }
     }
   };
 
   return (
     <div>
-      <h2>Departments</h2>
-      {error && <div style={{ color: "red" }}>{error}</div>}
-      <form onSubmit={handleSubmit}>
-        <input name="name" value={form.name} onChange={handleChange} placeholder="Name" />
-        <input name="intake" value={form.intake} onChange={handleChange} placeholder="Intake" />
-        <input name="hod" value={form.hod} onChange={handleChange} placeholder="HOD" />
+      <h3>Departments</h3>
+      {error && <div style={{ color: "red", marginBottom: "10px" }}>{error}</div>}
+      <form onSubmit={handleSubmit} style={{ marginBottom: "20px" }}>
+        <input name="name" value={form.name} onChange={handleChange} placeholder="Name" required />
+        <input name="intake" type="number" value={form.intake} onChange={handleChange} placeholder="Intake" required />
+        <input name="hod" value={form.hod} onChange={handleChange} placeholder="HOD" required />
         <button type="submit">Add Department</button>
       </form>
-      <table border="1">
+      <table border="1" style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
           <tr><th>ID</th><th>Name</th><th>Intake</th><th>HOD</th><th>Actions</th></tr>
         </thead>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchAll, createEntity, deleteEntity } from "../api";
+import { fetchAll, createEntity, deleteEntity } from "../services/apiService";
 
 export default function AssessmentPage() {
   const [assessments, setAssessments] = useState([]);
@@ -9,8 +9,8 @@ export default function AssessmentPage() {
   const loadData = async () => {
     try {
       setError(null);
-      const data = await fetchAll("assessments");
-      setAssessments(Array.isArray(data) ? data : []);
+      const response = await fetchAll("assessments");
+      setAssessments(Array.isArray(response.data) ? response.data : []);
     } catch (err) { setError("Failed to load assessments"); }
   };
 
@@ -22,9 +22,13 @@ export default function AssessmentPage() {
     e.preventDefault();
     try {
       setError(null);
-      await createEntity("assessments", { ...form, marks: Number(form.marks), totalMarks: Number(form.totalMarks) });
+
+      // ✅ FINAL FIX: Get the 'data' property from the response
+      const response = await createEntity("assessments", { ...form, marks: Number(form.marks), totalMarks: Number(form.totalMarks) });
+      const newAssessment = response.data; // This is the new Assessment DTO
+
+      setAssessments(currentAssessments => [...currentAssessments, newAssessment]);
       setForm({ number: "", date: "", marks: "", totalMarks: "" });
-      loadData();
     } catch (err) { setError(err.response?.data?.message || "Failed to create assessment"); }
   };
 
@@ -33,23 +37,23 @@ export default function AssessmentPage() {
       try {
         setError(null);
         await deleteEntity("assessments", id);
-        loadData();
+        setAssessments(currentAssessments => currentAssessments.filter(a => a.id !== id));
       } catch (err) { setError(err.response?.data?.message || "Failed to delete assessment"); }
     }
   };
 
   return (
     <div>
-      <h2>Assessments</h2>
-      {error && <div style={{ color: "red" }}>{error}</div>}
-      <form onSubmit={handleSubmit}>
+      <h3>Assessments</h3>
+      {error && <div style={{ color: "red", marginBottom: "10px" }}>{error}</div>}
+      <form onSubmit={handleSubmit} style={{ marginBottom: "20px" }}>
         <input name="number" value={form.number} onChange={handleChange} placeholder="Number" />
         <input type="date" name="date" value={form.date} onChange={handleChange} />
-        <input name="marks" value={form.marks} onChange={handleChange} placeholder="Marks" />
-        <input name="totalMarks" value={form.totalMarks} onChange={handleChange} placeholder="Total Marks" />
+        <input name="marks" type="number" value={form.marks} onChange={handleChange} placeholder="Marks" />
+        <input name="totalMarks" type="number" value={form.totalMarks} onChange={handleChange} placeholder="Total Marks" />
         <button type="submit">Add Assessment</button>
       </form>
-      <table border="1">
+      <table border="1" style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
           <tr><th>ID</th><th>No</th><th>Date</th><th>Marks</th><th>Total</th><th>Actions</th></tr>
         </thead>
