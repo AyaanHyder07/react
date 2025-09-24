@@ -1,4 +1,4 @@
-# Student & Staff Management System
+# PRISM - Polytechnic Report and Information Managment System
 
 This is a complete full-stack web application with a **Spring Boot 3** backend and a **React.js** frontend. The project offers a secure, multi-user portal for managing academic data, including students, staff, departments, exams, and results.
 
